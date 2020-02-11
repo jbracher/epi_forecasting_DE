@@ -330,8 +330,6 @@ get_weekly_timeseries_one_yr <- function(disease = "Noroviral gastroenteritis", 
 #'
 #' @return a tibble with data
 #' @export
-#'
-#' @examples
 get_weekly_timeseries <- function(disease = "Noroviral gastroenteritis", years, region_level="State") {
   return(do.call("rbind", lapply(years, FUN=function(x) get_weekly_timeseries_one_yr(disease=disease, year=x, region_level=region_level))))
 }
