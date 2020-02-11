@@ -1,8 +1,15 @@
-# method to recieve the xml from the WebService
-# parameter: body_ : the xml request,  service_ : the WebService method
+
+#' method to recieve the xml from the WebService
+#'
+#' @param body_ the xml request
+#' @param service_ the WebService method
+#'
+#' @return something XMLish
+#'
 getXMLFromWebService <- function(body_,service_){
   require(RCurl)
   require(XML)
+  require(stringi)
   
   # URL to the WebService
   webServiceUrl <- "https://tools.rki.de/SurvStat/SurvStatWebService.svc"
@@ -35,8 +42,17 @@ getXMLFromWebService <- function(body_,service_){
   return(doc_x)
 }
 
+#' Utilities for accessing data
+#'
+#' @param cube 
+#' @param language 
+#' @param filter 
+#'
+#' @return something XMLish
+#'
 getHierarchyMembers <- function(cube, language, filter){
   require(XML)
+  require(dplyr)
   
   # Select HierarchyId from the first row
   hId <- getHierarchies(cube, language) %>% 
@@ -76,8 +92,16 @@ getHierarchyMembers <- function(cube, language, filter){
   return(HierarchyMemberDataFrame)
 }
 
+#' More utilities
+#'
+#' @param cube 
+#' @param language 
+#'
+#' @return something XMLish
 getHierarchies <- function(cube, language){
   require(XML)
+  require(dplyr)
+  
   
   #language = 'German' #'German'/'English' (Case Sensitive!) 
   #cube = 'SurvStat' #'SurvStat' (Case Sensitive!)
@@ -153,9 +177,23 @@ getHierarchies <- function(cube, language){
 }
 
 
+#' more utilities
+#'
+#' @param cube 
+#' @param language 
+#' @param hierarchy 
+#' @param facet 
+#' @param filter 
+#' @param filterValue 
+#' @param filter2 
+#' @param filterValue2 
+#'
+#' @return a data.frame
 getOlapData <- function(cube, language, hierarchy, facet, filter, filterValue, filter2, filterValue2){
   require(XML)
   require(data.table)
+  require(dplyr)
+  
   
   column <- getHierarchies(cube, language) %>% filter(HierarchyCaption==hierarchy) %>% select(HierarchyId) %>% unlist() %>% as.character()
   row <- getHierarchies(cube, language) %>% filter(HierarchyCaption==facet) %>% select(HierarchyId) %>% unlist() %>% as.character()
@@ -236,20 +274,34 @@ getOlapData <- function(cube, language, hierarchy, facet, filter, filterValue, f
   
   data.m <- data.table::melt(finalFrame, id.vars='Categories') 
   
-  data.m
+  return(data.m)
 }
 
+#' retrieve available diseases
+#'
+#' @return data.frame with available diseases 
+#' @export
+#'
 get_diseases <- function(){
   require(dplyr)
   cube <- "SurvStat"
   language <- "English"
   filter <- "Disease"
-  getHierarchyMembers(cube, language, filter) %>% 
-    dplyr::select(Caption)
+  return(getHierarchyMembers(cube, language, filter) %>% dplyr::select(Caption))
 }
 
+#' Download and format a weekly timeseries to data.frame
+#'
+#' @param disease which disease to retrieve data for
+#' @param year which year to retrieve data for
+#' @param region_level which level to retrieve data for
+#'
+#' @return a data.frame with data
+#' @export
+#' 
 get_weekly_timeseries <- function(disease = "Noroviral gastroenteritis", year = "2019", region_level = "State"){
   require(ISOweek)
+  require(dplyr)
   cube <- "SurvStat"
   language <- "English"
   hierarchy <- "Year and week of notification"
@@ -264,6 +316,6 @@ get_weekly_timeseries <- function(disease = "Noroviral gastroenteritis", year = 
   data$Week <- substr(data$Categories,8,9)
   data$date <- ISOweek::ISOweek2date(paste0(data$Year,"-W",data$Week,"-1"))
   
-  return(data)
+  return(as_tibble(data))
 }
 

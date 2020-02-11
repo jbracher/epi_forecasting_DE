@@ -2,13 +2,13 @@ Package: desurvdata
 Version: 0.0.1
 Date: 2020-02-11
 Title: Retrieving German Surveillance Data
-Authors@R: c(,
-  person("Johannes", "Bracher", email = "johannes.bracher@uzh.ch", role = "aut")
+Authors@R: c(person("Johannes", "Bracher", email = "johannes.bracher@uzh.ch", role = c("cre", "aut")),
   person("Nicholas G.", "Reich", email = "nick@schoolph.umass.edu", role = "aut"),
   person("Alexander", "Ullrich", email = "UllrichA@rki.de", role = "aut"),
   person("Sebastian", "Meyer", email = "seb.meyer@fau.de", role = "aut"))
 Maintainer: Johannes Bracher <johannes.bracher@uzh.ch>
+Encoding: UTF-8
 License: GPL (>= 2)
 URL: https://github.com/jbracher/epi_forecasting_DE
-Description: Functions to retrieve German public health surveillance data
-    via web APIs.
+Description: Functions to retrieve German public health surveillance data via web APIs.
+RoxygenNote: 6.1.1
