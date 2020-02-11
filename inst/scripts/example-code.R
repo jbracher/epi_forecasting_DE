@@ -9,7 +9,6 @@ ggplot(weekly_noro, aes(x=date, y=value)) +
     geom_line() +
     facet_wrap(variable~.)
 
-
 ggplot(weekly_rsv, aes(x=date, y=value)) + 
     geom_line() +
     facet_wrap(variable~.)

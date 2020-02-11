@@ -290,16 +290,19 @@ get_diseases <- function(){
   return(getHierarchyMembers(cube, language, filter) %>% dplyr::select(Caption))
 }
 
-#' Download and format a weekly timeseries to data.frame
+#' Download and format a weekly timeseries from one year to data.frame
+#'
+#' @description API only allows one year downloaded at a time (max rows per query).
+#' So this function helps split queries up.
 #'
 #' @param disease which disease to retrieve data for
 #' @param year which year to retrieve data for
 #' @param region_level which level to retrieve data for
 #'
-#' @return a data.frame with data
+#' @return a tibble with data
 #' @export
 #' 
-get_weekly_timeseries <- function(disease = "Noroviral gastroenteritis", year = "2019", region_level = "State"){
+get_weekly_timeseries_one_yr <- function(disease = "Noroviral gastroenteritis", year = "2019", region_level = "State"){
   require(ISOweek)
   require(dplyr)
   cube <- "SurvStat"
@@ -317,5 +320,19 @@ get_weekly_timeseries <- function(disease = "Noroviral gastroenteritis", year = 
   data$date <- ISOweek::ISOweek2date(paste0(data$Year,"-W",data$Week,"-1"))
   
   return(as_tibble(data))
+}
+
+#' Download and process multiple years of data
+#'
+#' @param disease which disease to retrieve data for
+#' @param years which years to retrieve data for
+#' @param region_level which level to retrieve data for
+#'
+#' @return a tibble with data
+#' @export
+#'
+#' @examples
+get_weekly_timeseries <- function(disease = "Noroviral gastroenteritis", years, region_level="State") {
+  return(do.call("rbind", lapply(years, FUN=function(x) get_weekly_timeseries_one_yr(disease=disease, year=x, region_level=region_level))))
 }
 

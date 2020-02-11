@@ -2,21 +2,21 @@
 % Please edit documentation in R/survstat_webservice.R
 \name{get_weekly_timeseries}
 \alias{get_weekly_timeseries}
-\title{Download and format a weekly timeseries to data.frame}
+\title{Download and process multiple years of data}
 \usage{
-get_weekly_timeseries(disease = "Noroviral gastroenteritis",
-  year = "2019", region_level = "State")
+get_weekly_timeseries(disease = "Noroviral gastroenteritis", years,
+  region_level = "State")
 }
 \arguments{
 \item{disease}{which disease to retrieve data for}
 
-\item{year}{which year to retrieve data for}
+\item{years}{which years to retrieve data for}
 
 \item{region_level}{which level to retrieve data for}
 }
 \value{
-a data.frame with data
+a tibble with data
 }
 \description{
-Download and format a weekly timeseries to data.frame
+Download and process multiple years of data
 }
