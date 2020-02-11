@@ -5,4 +5,4 @@ Forecasting infectious disease incidence in Germany.
 Current structure:
 
 - `R`: some preliminary R codes to access data sources via API
-- `Additional_Data`: some data sets which may be of help (population etc.)
+- `inst/Additional_Data`: some data sets which may be of help (population etc.)

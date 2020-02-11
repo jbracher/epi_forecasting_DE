@@ -1,14 +1,8 @@
-library(shiny)
-library(RCurl)
-library(XML)
-library(stringi)
-library(data.table)  
-library(ISOweek)
-
-##### functions
 # method to recieve the xml from the WebService
 # parameter: body_ : the xml request,  service_ : the WebService method
 getXMLFromWebService <- function(body_,service_){
+  require(RCurl)
+  require(XML)
   
   # URL to the WebService
   webServiceUrl <- "https://tools.rki.de/SurvStat/SurvStatWebService.svc"
@@ -42,8 +36,13 @@ getXMLFromWebService <- function(body_,service_){
 }
 
 getHierarchyMembers <- function(cube, language, filter){
+  require(XML)
+  
   # Select HierarchyId from the first row
-  hId <- getHierarchies(cube, language) %>% filter(HierarchyCaption==filter) %>% dplyr::select(HierarchyId) %>% unlist()
+  hId <- getHierarchies(cube, language) %>% 
+    filter(HierarchyCaption==filter) %>% 
+    dplyr::select(HierarchyId) %>% 
+    unlist()
   
   # XML Request Body 
   body = paste0('<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:sur="http://tools.rki.de/SurvStat/" xmlns:rki="http://schemas.datacontract.org/2004/07/Rki.SurvStat.WebService.Contracts.Mdx">
@@ -78,6 +77,8 @@ getHierarchyMembers <- function(cube, language, filter){
 }
 
 getHierarchies <- function(cube, language){
+  require(XML)
+  
   #language = 'German' #'German'/'English' (Case Sensitive!) 
   #cube = 'SurvStat' #'SurvStat' (Case Sensitive!)
   # XML Request Body -------------EXTERN
@@ -153,6 +154,8 @@ getHierarchies <- function(cube, language){
 
 
 getOlapData <- function(cube, language, hierarchy, facet, filter, filterValue, filter2, filterValue2){
+  require(XML)
+  require(data.table)
   
   column <- getHierarchies(cube, language) %>% filter(HierarchyCaption==hierarchy) %>% select(HierarchyId) %>% unlist() %>% as.character()
   row <- getHierarchies(cube, language) %>% filter(HierarchyCaption==facet) %>% select(HierarchyId) %>% unlist() %>% as.character()
@@ -207,15 +210,11 @@ getOlapData <- function(cube, language, hierarchy, facet, filter, filterValue, f
   # WebService method
   service_ <- 'GetOlapResultData'
   
-  
-  
-  
   AllData <- getXMLFromWebService(body,service_)
   
   dataNodeColumnSet <- getNodeSet(AllData, "//b:Columns/b:QueryResultColumn", namespaces  =  c("b" = "http://schemas.datacontract.org/2004/07/Rki.SurvStat.WebService.Contracts.Mdx"))
   columnCaptions <- lapply(dataNodeColumnSet, function(x) {
     columnCaption <- xmlValue(getNodeSet(x, "./b:Caption", namespaces  =  c("b" = "http://schemas.datacontract.org/2004/07/Rki.SurvStat.WebService.Contracts.Mdx"))[[1]])
-    
   })
   
   dataNodeRowSet <- getNodeSet(AllData, "//b:QueryResultRow", namespaces  =  c("b" = "http://schemas.datacontract.org/2004/07/Rki.SurvStat.WebService.Contracts.Mdx"))
@@ -235,21 +234,22 @@ getOlapData <- function(cube, language, hierarchy, facet, filter, filterValue, f
   finalFrame <- data.frame(cbind(columnCaptionsT,trowSet))
   rownames(finalFrame) <- 1:nrow(finalFrame)
   
-  
   data.m <- data.table::melt(finalFrame, id.vars='Categories') 
   
   data.m
-  
 }
 
 get_diseases <- function(){
+  require(dplyr)
   cube <- "SurvStat"
   language <- "English"
   filter <- "Disease"
-  getHierarchyMembers(cube, language, filter) %>% dplyr::select(Caption)
+  getHierarchyMembers(cube, language, filter) %>% 
+    dplyr::select(Caption)
 }
 
 get_weekly_timeseries <- function(disease = "Noroviral gastroenteritis", year = "2019", region_level = "State"){
+  require(ISOweek)
   cube <- "SurvStat"
   language <- "English"
   hierarchy <- "Year and week of notification"
@@ -264,29 +264,6 @@ get_weekly_timeseries <- function(disease = "Noroviral gastroenteritis", year = 
   data$Week <- substr(data$Categories,8,9)
   data$date <- ISOweek::ISOweek2date(paste0(data$Year,"-W",data$Week,"-1"))
   
-  data
+  return(data)
 }
 
-weekly_timeseries <- get_weekly_timeseries()
-
-# cube <- "SurvStat"
-# language <- "English"
-# hierarchies <- getHierarchies(cube, language) %>% dplyr::select(HierarchyCaption)
-# hierarchy <- hierarchies[7,"HierarchyCaption"]
-# facet <- hierarchies[18,"HierarchyCaption"]
-# filter <- hierarchies[3,"HierarchyCaption"]
-# members <- getHierarchyMembers(cube, language, filter) %>% dplyr::select(Caption)
-# filterValue <- members[65, "Caption"]
-# filter2 <- hierarchies[5,"HierarchyCaption"]
-# members2 <- getHierarchyMembers(cube, language, filter2) %>% dplyr::select(Caption)
-# filterValue2 <- members2[2, "Caption"]
-# 
-# data <- getOlapData(cube, language, hierarchy, facet, filter, filterValue, filter2, filterValue2)
-# 
-# if(hierarchy=="Year and week of notification"){
-#   data$Year <- substr(data$Categories,1,4)
-#   data$Week <- substr(data$Categories,8,9)
-#   data$date <- as.Date(paste0(data$Year,"-",data$Week,"-1"), "%Y-%U-%u")
-#   
-#   ggplot(data, aes(x=date, y=value, color=variable)) + geom_line()
-# }
