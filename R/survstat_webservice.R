@@ -315,11 +315,10 @@ get_weekly_timeseries_one_yr <- function(disease = "Noroviral gastroenteritis", 
     facet <- region_level
     
     data <- getOlapData(cube, language, hierarchy, facet, filter, filterValue, filter2, filterValue2)
-    string_year <- substr(data$Categories,1,4)
-    string_week <- substr(data$Categories,8,9)
-    data$date <- ISOweek::ISOweek2date(paste0(string_year,"-W", string_week,"-1"))
+    string_season <- substr(data$Categories,1,4)
+    string_week <- substr(data$Categories,11,12)
     data$week <- as.numeric(string_week)
-    data$year <- as.numeric(string_year)
+    data$season <- as.numeric(string_season)
     
     # rename columns in more meaningful way:
     colnames(data)[colnames(data) == "Categories"] <- "time_string"
