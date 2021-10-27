@@ -307,7 +307,7 @@ get_weekly_timeseries_one_yr <- function(disease = "Noroviral gastroenteritis", 
     require(dplyr)
     cube <- "SurvStat"
     language <- "English"
-    hierarchy <- "Year and week of notification"
+    hierarchy <- "Season year and week (27)"
     filter <- "Disease"
     filterValue <- disease
     filter2 <- "Year of notification"
